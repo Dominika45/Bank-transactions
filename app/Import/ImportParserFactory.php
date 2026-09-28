@@ -4,6 +4,8 @@ namespace App\Import;
 
 use App\Import\Contracts\ImportParser;
 use App\Import\Parsers\CsvParser;
+use App\Import\Parsers\JsonParser;
+use App\Import\Parsers\XmlParser;
 
 class ImportParserFactory
 {
