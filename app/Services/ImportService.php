@@ -33,12 +33,24 @@ class ImportService
         $failed_records = 0;
 
         foreach($records as $record) {
+
             $validator = Validator::make(
                 $record,
                 $this->transactionValidator->rules()
             );
 
             if ($validator->fails() === false) {
+
+                if (Transaction::where('transaction_id', '=', $record['transaction_id'])->exists()) {
+                    ImportLog::create([
+                        'import_id' => $import->id,
+                        'transaction_id' => $record['transaction_id'] ?? null,
+                        'error_message' => 'Powielona transakcja.',
+                    ]);
+                    $failed_records ++;
+                    continue;
+                }
+
                 Transaction::create($record);
                 $successful_records ++;
             }

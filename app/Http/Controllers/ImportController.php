@@ -26,7 +26,7 @@ class ImportController extends Controller
 
     public function index()
     {
-        $import = Import::all();
+        $import = Import::orderBy('created_at', 'desc')->get();
 
         return response()->json($import);
     }

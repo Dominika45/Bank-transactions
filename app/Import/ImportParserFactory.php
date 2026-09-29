@@ -16,7 +16,7 @@ class ImportParserFactory
             'json' => new JsonParser(),
             'xml' => new XmlParser(),
             default => throw new \InvalidArgumentException(
-                "Unsupported file format: {$extension}"
+                "Nieobsługiwany format pliku: {$extension}"
             ),
         };
     }

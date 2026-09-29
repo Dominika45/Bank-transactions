@@ -94,7 +94,7 @@
                                 <thead>
                                     <tr class="bg-gray-50">
                                         <th class="border p-3 text-left">
-                                            Transaction ID
+                                            ID transakcji
                                         </th>
                                         <th class="border p-3 text-left">
                                             Komunikat błędu

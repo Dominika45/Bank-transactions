@@ -5,6 +5,7 @@
 
     const links = [
         { to: '/imports', label: 'Lista importów' },
+        { to: '/transactions', label: 'Lista transakcji' },
     ]
 </script>
 
