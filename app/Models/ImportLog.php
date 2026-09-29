@@ -18,6 +18,6 @@ class ImportLog extends Model
 
     public function import(): BelongsTo
 	{
-		return $this->belongsTo(Import::class);
+		return $this->belongsTo(Import::class, 'import_id');
 	}
 }

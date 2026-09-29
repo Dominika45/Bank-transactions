@@ -5,4 +5,4 @@ use App\Http\Controllers\ImportController;
 
 Route::post('/imports', [ImportController::class, 'store']);
 Route::get('/imports', [ImportController::class, 'index']);
-Route::get('/imports/{import}', [ImportController::class, 'show']);
+Route::get('/imports/{id}', [ImportController::class, 'show']);

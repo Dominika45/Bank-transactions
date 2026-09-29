@@ -1,66 +1,458 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Import transakcji bankowych
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikacja do importowania transakcji bankowych z plików **CSV, JSON i XML**.
 
-## About Laravel
+Projekt został wykonany w oparciu o:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+* **Laravel 12** – backend REST API
+* **Vue 3** – frontend
+* **Tailwind CSS** – stylowanie interfejsu
+* **MySQL **– baza danych
+* **Vite** – budowanie frontendu
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Funkcjonalności
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Aplikacja umożliwia:
 
-## Learning Laravel
+* przesłanie pliku CSV, JSON lub XML,
+* walidację każdej transakcji,
+* zapis poprawnych transakcji w bazie danych,
+* zapis błędnych rekordów w logach importu,
+* zapis informacji o każdym imporcie,
+* wyświetlenie listy wykonanych importów,
+* wyświetlenie szczegółów wybranego importu,
+* wyświetlenie komunikatów błędów dla niepoprawnych rekordów,
+* automatyczne odświeżenie listy importów po wykonaniu importu.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Architektura
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Backend
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Backend został podzielony na kilka odpowiedzialności.
 
-## Laravel Sponsors
+```text
+app/
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   │       └── ImportController.php
+│   └── Requests/
+│       └── ImportRequest.php
+│
+├── Import/
+│   ├── Contracts/
+│   │   └── ImportParser.php
+│   ├── Parsers/
+│   │   ├── CsvParser.php
+│   │   ├── JsonParser.php
+│   │   └── XmlParser.php
+│   ├── ImportParserFactory.php
+│   └── TransactionValidator.php
+│
+├── Models/
+│   ├── Import.php
+│   ├── ImportLog.php
+│   └── Transaction.php
+│
+└── Services/
+    └── ImportService.php
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Przepływ importu
 
-### Premium Partners
+```text
+POST /api/imports
+        │
+        ▼
+ImportController
+        │
+        ▼
+ImportService
+        │
+        ▼
+ImportParserFactory
+        │
+        ├── CSV → CsvParser
+        ├── JSON → JsonParser
+        └── XML → XmlParser
+        │
+        ▼
+Ujednolicone rekordy
+        │
+        ▼
+TransactionValidator
+        │
+        ├── poprawny rekord
+        │       ↓
+        │   transactions
+        │
+        └── błędny rekord
+                ↓
+            import_logs
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Dzięki zastosowaniu wspólnego interfejsu `ImportParser` dodanie kolejnego formatu pliku nie wymaga zmiany logiki znajdującej się w `ImportService`.
 
-## Contributing
+## Walidacja
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Każdy rekord jest walidowany niezależnie.
 
-## Code of Conduct
+Obowiązujące reguły:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Pole               | Walidacja                           |
+| ------------------ | ----------------------------------- |
+| `transaction_id`   | wymagane                            |
+| `account_number`   | wymagane, poprawny IBAN             |
+| `transaction_date` | wymagana poprawna data              |
+| `amount`           | wymagana liczba większa od 0        |
+| `currency`         | wymagane dokładnie 3 wielkie litery |
 
-## Security Vulnerabilities
+Niepoprawne rekordy nie są zapisywane w tabeli `transactions`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Zamiast tego do `import_logs` trafiają:
 
-## License
+* identyfikator importu,
+* `transaction_id`,
+* komunikat błędu.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Status importu
+
+Import może otrzymać jeden z trzech statusów:
+
+| Status    | Znaczenie                                                     |
+| --------- | ------------------------------------------------------------- |
+| `success` | wszystkie rekordy zostały poprawnie zaimportowane             |
+| `partial` | część rekordów została zaimportowana, a część zawierała błędy |
+| `failed`  | żaden rekord nie został poprawnie zaimportowany               |
+
+Przykład:
+
+```text
+100 rekordów
+97 poprawnych
+3 błędne
+
+status = partial
+```
+
+## Struktura bazy danych
+
+### `transactions`
+
+Przechowuje poprawnie zaimportowane transakcje.
+
+```text
+id
+transaction_id
+account_number
+transaction_date
+amount
+currency
+created_at
+```
+
+### `imports`
+
+Przechowuje informacje o wykonanych importach.
+
+```text
+id
+file_name
+total_records
+successful_records
+failed_records
+status
+created_at
+```
+
+### `import_logs`
+
+Przechowuje błędy dotyczące poszczególnych rekordów.
+
+```text
+id
+import_id
+transaction_id
+error_message
+created_at
+```
+
+## API
+
+### POST `/api/imports`
+
+Importuje plik.
+
+Request powinien być wysłany jako `multipart/form-data`.
+
+Pole:
+
+```text
+import_file
+```
+
+Obsługiwane formaty:
+
+```text
+CSV
+JSON
+XML
+```
+
+Przykładowa odpowiedź:
+
+```json
+{
+    "id": 1,
+    "file_name": "transactions.csv",
+    "total_records": 10,
+    "successful_records": 8,
+    "failed_records": 2,
+    "status": "partial"
+}
+```
+
+### GET `/api/imports`
+
+Zwraca listę wykonanych importów.
+
+Przykładowa odpowiedź:
+
+```json
+[
+    {
+        "id": 1,
+        "file_name": "transactions.csv",
+        "total_records": 10,
+        "successful_records": 8,
+        "failed_records": 2,
+        "status": "partial"
+    }
+]
+```
+
+### GET `/api/imports/{id}`
+
+Zwraca szczegóły wybranego importu wraz z logami błędów.
+
+Przykładowa odpowiedź:
+
+```json
+{
+    "id": 1,
+    "file_name": "transactions.csv",
+    "total_records": 10,
+    "successful_records": 8,
+    "failed_records": 2,
+    "status": "partial",
+    "importLog": [
+        {
+            "id": 1,
+            "import_id": 1,
+            "transaction_id": "TX003",
+            "error_message": "Pole kwota musi być większe od 0."
+        }
+    ]
+}
+```
+
+## Frontend
+
+Frontend został wykonany w Vue 3.
+
+Struktura:
+
+```text
+resources/js/
+├── app.js
+├── App.vue
+│
+├── router/
+│   └── index.js
+│
+├── views/
+│   └── Imports/
+│       ├── ImportsIndex.vue
+│       └── ImportDetails.vue
+│
+├── components/
+│   ├── Navigation.vue
+│   ├── ImportsList.vue
+│   └── ImportUploadModal.vue
+│
+└── services/
+    └── importService.js
+```
+
+### Widok listy importów
+
+Dostępny pod:
+
+```text
+/imports
+```
+
+Wyświetla:
+
+* nazwę pliku,
+* liczbę wszystkich rekordów,
+* liczbę poprawnych rekordów,
+* liczbę błędnych rekordów,
+* status importu,
+* datę dodania,
+* link do szczegółów.
+
+Import pliku odbywa się za pomocą formularza w modalu.
+
+Po poprawnym imporcie lista zostaje automatycznie odświeżona.
+
+### Szczegóły importu
+
+Dostępne pod:
+
+```text
+/imports/{id}
+```
+
+Widok prezentuje informacje o imporcie oraz tabelę błędnych rekordów.
+
+Dla każdego błędu wyświetlane są:
+
+* `transaction_id`,
+* komunikat błędu.
+
+## Wymagania
+
+Do uruchomienia projektu potrzebne są:
+
+* PHP 8.2+
+* Composer
+* Node.js
+* npm
+* baza danych obsługiwana przez Laravel
+
+## Instalacja
+
+### 1. Pobranie projektu
+
+```bash
+git clone <adres-repozytorium>
+cd bank-transactions
+```
+
+### 2. Instalacja zależności PHP
+
+```bash
+composer install
+```
+
+### 3. Instalacja zależności JavaScript
+
+```bash
+npm install
+```
+
+### 4. Konfiguracja środowiska
+
+Utwórz plik `.env` na podstawie `.env.example`.
+
+```bash
+cp .env.example .env
+```
+
+Następnie skonfiguruj połączenie z bazą danych w `.env`.
+
+### 6. Migracje
+
+```bash
+php artisan migrate
+```
+
+### 7. Uruchomienie backendu
+
+```bash
+php artisan serve
+```
+
+Backend będzie dostępny pod:
+
+```text
+http://127.0.0.1:8000
+```
+
+### 8. Uruchomienie frontendu
+
+W drugim terminalu:
+
+```bash
+npm run dev
+```
+
+Następnie aplikacja będzie dostępna pod adresem wyświetlonym przez Vite.
+
+## Testy
+
+Testy można uruchomić poleceniem:
+
+```bash
+php artisan test
+```
+
+## Przykładowy plik CSV
+
+```csv
+transaction_id,account_number,transaction_date,amount,currency
+TX001,PL61109010140000071219812874,2026-09-01,100.00,PLN
+TX002,PL61109010140000071219812874,2026-09-02,250.50,PLN
+```
+
+Separatorem dla plików CSV jest przecinek.
+
+## Obsługa błędnych rekordów
+
+Przykładowy niepoprawny rekord:
+
+```csv
+TX003,PL61109010140000071219812874,2026-09-03,-10.00,PLN
+```
+
+Ponieważ kwota musi być większa od `0`, rekord nie zostanie zapisany w `transactions`.
+
+Zostanie natomiast utworzony wpis w `import_logs`:
+
+```text
+transaction_id: TX003
+error_message: Pole kwota musi być większe od 0.
+```
+
+Pozostałe poprawne rekordy z tego samego pliku zostaną zaimportowane.
+
+## Decyzje projektowe
+
+### Osobne parsery dla formatów
+
+CSV, JSON i XML mają różną strukturę, dlatego każdy format posiada własny parser implementujący wspólny interfejs `ImportParser`.
+
+Dzięki temu `ImportService` nie musi wiedzieć, w jaki sposób konkretny format jest odczytywany.
+
+### Factory
+
+`ImportParserFactory` wybiera parser na podstawie rozszerzenia pliku.
+
+```text
+csv → CsvParser
+json → JsonParser
+xml → XmlParser
+```
+
+### Walidacja na dwóch poziomach
+
+Walidacja pliku wykonywana jest na poziomie requestu, natomiast walidacja poszczególnych rekordów wykonywana jest podczas importu.
+
+Dzięki temu pojedynczy błędny rekord nie blokuje całego importu.
+
+### Logowanie błędów
+
+Błędne rekordy nie są zapisywane jako transakcje. Ich błędy są zapisywane w `import_logs`, dzięki czemu użytkownik może sprawdzić, które rekordy wymagały poprawy.
+
+Obecna implementacja skupia się na wymaganiach określonych w zadaniu.

@@ -13,6 +13,6 @@ class Import extends Model
 
     public function importLog(): HasMany
 	{
-		return $this->hasMany(ImportLog::class);
+		return $this->hasMany(ImportLog::class, 'import_id');
 	}
 }
