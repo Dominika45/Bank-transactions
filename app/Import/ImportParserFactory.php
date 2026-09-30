@@ -9,8 +9,10 @@ use App\Import\Parsers\XmlParser;
 
 class ImportParserFactory
 {
+	
     public function make(string $extension): ImportParser
     {
+		
         return match ($extension) {
             'csv' => new CsvParser(),
             'json' => new JsonParser(),
@@ -19,5 +21,7 @@ class ImportParserFactory
                 "Nieobsługiwany format pliku: {$extension}"
             ),
         };
+		
     }
+	
 }

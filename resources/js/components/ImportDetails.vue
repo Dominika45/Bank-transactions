@@ -6,10 +6,20 @@
     const route = useRoute()
 
     const importData = ref(null)
+    const loading = ref(true)
 
     onMounted(async () => {
-        const response = await axios.get(`/api/imports/${route.params.id}`)
-        importData.value = response.data
+        loading.value = true
+
+        try {
+            const response = await axios.get(`/api/imports/${route.params.id}`)
+
+            importData.value = response.data
+        } catch (error) {
+            console.error('Błąd podczas pobierania importu:', error)
+        } finally {
+            loading.value = false
+        }
     })
 
     const statusLabel = (status) => {
@@ -77,6 +87,15 @@
 
                     <div class="mb-8">
                         <p class="text-sm text-gray-500">
+                            Data importu
+                        </p>
+                        <p class="mt-1 font-semibold text-gray-900">
+                            {{ new Date(importData.created_at).toLocaleString('pl-PL') }}
+                        </p>
+                    </div>
+
+                    <div class="mb-8">
+                        <p class="text-sm text-gray-500">
                             Status importu
                         </p>
                         <p class="mt-1 font-semibold text-gray-900">
@@ -103,17 +122,22 @@
                                 </thead>
 
                                 <tbody>
-                                    <tr v-for="log in importData.import_log" :key="log.id">
+                                    <tr v-if="loading">
+                                        <td colspan="2" class="p-5 text-center text-gray-500">
+                                            Ładowanie...
+                                        </td>
+                                    </tr>
+                                    <tr v-else-if="!importData.import_log || importData.import_log.length === 0">
+                                        <td colspan="2" class="border p-5 text-center text-gray-500" >
+                                            Brak błędów dla tego importu.
+                                        </td>
+                                    </tr>
+                                    <tr v-else v-for="log in importData.import_log" :key="log.id">
                                         <td class="border p-3">
                                             {{ log.transaction_id }}
                                         </td>
                                         <td class="border p-3">
                                             {{ log.error_message }}
-                                        </td>
-                                    </tr>
-                                    <tr v-if="!importData.import_log || importData.import_log.length === 0">
-                                        <td colspan="2" class="border p-6 text-center text-gray-500" >
-                                            Brak błędów dla tego importu.
                                         </td>
                                     </tr>
                                 </tbody>

@@ -10,19 +10,26 @@
     })
 
     const transactions = ref([])
+    const loading = ref(true)
     const currentPage = ref(1)
     const lastPage = ref(1)
 
     const loadTransactions = async (page = 1) => {
-        const response = await axios.get('/api/transactions', {
-            params: {
-                page: page,
-            },
-        })
+        loading.value = true
 
-        transactions.value = response.data.data
-        currentPage.value = response.data.current_page
-        lastPage.value = response.data.last_page
+        try {
+            const response = await axios.get('/api/transactions', {
+                params: {
+                    page: page,
+                },
+            })
+
+            transactions.value = response.data.data
+            currentPage.value = response.data.current_page
+            lastPage.value = response.data.last_page
+        } finally {
+            loading.value = false
+        }
     }
 
     onMounted(() => {
@@ -35,7 +42,6 @@
             loadTransactions()
         }
     )
-
 </script>
 
 <template>
@@ -51,7 +57,17 @@
             </tr>
         </thead>
         <tbody>
-        <tr v-for="item in transactions" :key="item.id">
+            <tr v-if="loading">
+                <td colspan="6" class="p-5 text-center text-gray-500">
+                    Ładowanie transakcji...
+                </td>
+            </tr>
+            <tr v-else-if="transactions.length === 0">
+                <td colspan="6" class="p-5 text-center text-gray-500" >
+                    Brak transakcji do wyświetlenia.
+                </td>
+            </tr>
+            <tr v-else v-for="item in transactions" :key="item.id">
                 <td class="p-2 border">{{ item.transaction_id }}</td>
                 <td class="p-2 border">{{ item.account_number }}</td>
                 <td class="p-2 border">{{ new Date(item.transaction_date).toLocaleString('pl-PL') }}</td>

@@ -17,6 +17,8 @@
         error.value = ''
     }
 
+    const allOrNothing = ref(false)
+
     const uploadFile = async () => {
         if (!file.value) {
             error.value = 'Wybierz plik.'
@@ -28,6 +30,7 @@
 
         const formData = new FormData()
         formData.append('import_file', file.value)
+        formData.append('all_or_nothing', allOrNothing.value ? '1' : '0')
 
         try {
             await axios.post('/api/imports', formData)
@@ -39,9 +42,11 @@
         } catch (err) {
             error.value =
                 err.response?.data?.errors?.import_file?.[0] ??
+                err.response?.data?.message ??
                 'Wystąpił błąd podczas importu.'
         } finally {
             loading.value = false
+            allOrNothing.value = false
         }
     }
 </script>
@@ -53,13 +58,15 @@
                 <h2 class="text-xl font-semibold text-gray-900">
                     Dodaj import
                 </h2>
-                <button type="button" @click="emit('close')" class="text-2xl text-gray-400 hover:text-gray-600">
-                    ×
-                </button>
+                <button type="button" @click="emit('close')" class="text-2xl text-gray-400 hover:text-gray-600">×</button>
             </div>
             <p class="mt-2 text-sm text-gray-500">
                 Wybierz plik CSV, JSON lub XML.
             </p>
+           <div class="mt-6 flex items-center gap-2">
+                <input v-model="allOrNothing" type="checkbox" :disabled="loading" class="rounded border-gray-300">
+                <span class="text-sm text-gray-700">Wszystko albo nic</span>
+            </div>
             <div class="mt-6">
                 <input type="file" accept=".csv,.json,.xml" @change="handleFileChange" class="block w-full rounded-lg border border-gray-300 p-2 text-sm">
             </div>

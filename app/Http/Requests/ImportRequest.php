@@ -7,23 +7,18 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ImportRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'import_file' => 'required|file|mimes:csv,json,xml'
+            'import_file' => 'required|file|mimes:csv,json,xml',
+            'all_or_nothing' => 'boolean',
         ];
     }
+	
 }

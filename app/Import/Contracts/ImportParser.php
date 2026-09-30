@@ -6,5 +6,7 @@ use Illuminate\Http\UploadedFile;
 
 interface ImportParser
 {
+	
     public function parse(UploadedFile $file): iterable;
+	
 }

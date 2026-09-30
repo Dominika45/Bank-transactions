@@ -1,0 +1,72 @@
+[
+  {
+    "transaction_id": "e6853c81-c764-4e7e-911b-3025829dbeed",
+    "account_number": "PL48817280569316610136160908",
+    "transaction_date": "2025-10-04",
+    "amount": 45000,
+    "currency": "PLN"
+  },
+  {
+    "transaction_id": "2d1286c7-93cd-45c3-b09d-55ffd00a0eb1",
+    "account_number": "PL57367580918331390128519747",
+    "transaction_date": "2025-10-14",
+    "amount": 120,
+    "currency": "CHF"
+  },
+  {
+    "transaction_id": "d4178327-aaa5-4ea7-a593-9ab98ec91d65",
+    "account_number": "PL56787619690593538894245451",
+    "transaction_date": "2025-10-05",
+    "amount": 7300,
+    "currency": "CHF"
+  },
+  {
+    "transaction_id": "a1ce4b58-24b7-4bf7-b6a2-1004346b6b60",
+    "account_number": "PL08205989889286583490896033",
+    "transaction_date": "2025-10-08",
+    "amount": 999,
+    "currency": "EUR"
+  },
+  {
+    "transaction_id": "ccaff0a4-50b8-4435-ab37-1a60ab2842d7",
+    "account_number": "PL72801963223542552639721823",
+    "transaction_date": "2025-10-12",
+    "amount": 45000,
+    "currency": "PLN"
+  },
+  {
+    "transaction_id": "558a23bb-1d13-40cf-9c9d-507d41e5ece8",
+    "account_number": "PL65585587541248796996551392",
+    "transaction_date": "2025-10-04",
+    "amount": 999,
+    "currency": "GBP"
+  },
+  {
+    "transaction_id": "c649237b-b70a-41b0-aedb-17f795ad8d72",
+    "account_number": "PL63281124590091995434943068",
+    "transaction_date": "2025-10-05",
+    "amount": 7300,
+    "currency": "EUR"
+  },
+  {
+    "transaction_id": "17679899-e54c-4254-9eb5-ae748b2b98e9",
+    "account_number": "PL79347050897821665601411867",
+    "transaction_date": "2025-10-05",
+    "amount": 20050,
+    "currency": "EUR"
+  },
+  {
+    "transaction_id": "bb07191f-da9b-4bb0-abb2-a0b2098ebe13",
+    "account_number": "PL22580287415441709544000446",
+    "transaction_date": "2025-10-06",
+    "amount": 120,
+    "currency": "CHF"
+  },
+  {
+    "transaction_id": "8dce04a9-87c6-48d7-9137-fee56b3c9113",
+    "account_number": "PL41522293407772339164214430",
+    "transaction_date": "2025-10-03",
+    "amount": 88800,
+    "currency": "USD"
+  }
+]

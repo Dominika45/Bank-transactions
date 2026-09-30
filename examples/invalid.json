@@ -1,0 +1,72 @@
+[
+  {
+    "transaction_id": "4913f0b3-de1e-4974-88e1-573a78a22dea",
+    "account_number": "PL16207296602088105502948384",
+    "transaction_date": "2025-10-10",
+    "amount": 7300,
+    "currency": "CHF"
+  },
+  {
+    "transaction_id": "e8f64a7e-97bb-486e-829d-845d5b85deae",
+    "account_number": "PL70184695942626437579151752",
+    "transaction_date": "2025-10-02",
+    "amount": 45000,
+    "currency": "GBP"
+  },
+  {
+    "transaction_id": "857f4474-3e8a-4dba-bb6f-3f2f0c81dd4e",
+    "account_number": "PL739381281019501082193672",
+    "transaction_date": "2025-10-08",
+    "amount": 120,
+    "currency": "EUR"
+  },
+  {
+    "transaction_id": "39093189-6bfb-43ae-850f-b020e41e48f8",
+    "account_number": "PL120355030615295587945142967",
+    "transaction_date": "2025-10-09",
+    "amount": 150000,
+    "currency": "PLN"
+  },
+  {
+    "transaction_id": "c4babb6b-c4a9-4849-8cc2-fde62e13ce15",
+    "account_number": "PL86287652X96286079078891214",
+    "transaction_date": "2025-10-11",
+    "amount": 7300,
+    "currency": "GBP"
+  },
+  {
+    "transaction_id": "cdb7240b-000b-41cc-aa6e-6ec1ddb8b2a7",
+    "account_number": "XX46412832571767103179130564",
+    "transaction_date": "2025-10-01",
+    "amount": 310000,
+    "currency": "CHF"
+  },
+  {
+    "transaction_id": "6342b644-00d8-49d6-a356-6a66fb950580",
+    "account_number": "PL83070719203767892711304362",
+    "transaction_date": "2025-10-02",
+    "amount": 88800,
+    "currency": "PLN"
+  },
+  {
+    "transaction_id": "c9624b70-9d89-4428-8a37-213dbffa2227",
+    "account_number": "",
+    "transaction_date": "2025-10-10",
+    "amount": 7300,
+    "currency": "PLN"
+  },
+  {
+    "transaction_id": "8f3d92f6-fa0f-4a5b-86b1-601cf90abed6",
+    "account_number": "PL68034227775242747141412831",
+    "transaction_date": "2025-10-12",
+    "amount": 120,
+    "currency": "PLN"
+  },
+  {
+    "transaction_id": "1bfc01ac-a070-4b80-8263-61370b44b673",
+    "account_number": "PL869286627529374312003952",
+    "transaction_date": "2025-10-12",
+    "amount": 310000,
+    "currency": "PLN"
+  }
+]

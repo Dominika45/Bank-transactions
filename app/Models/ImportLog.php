@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportLog extends Model
 {
+	
 	const UPDATED_AT = null;
 	
     protected $fillable = ['import_id', 'transaction_id', 'error_message'];
@@ -20,4 +21,5 @@ class ImportLog extends Model
 	{
 		return $this->belongsTo(Import::class, 'import_id');
 	}
+	
 }

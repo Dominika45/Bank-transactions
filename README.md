@@ -7,7 +7,7 @@ Projekt został wykonany w oparciu o:
 * **Laravel 12** – backend REST API
 * **Vue 3** – frontend
 * **Tailwind CSS** – stylowanie interfejsu
-* **MySQL **– baza danych
+* **MySQL**– baza danych
 * **Vite** – budowanie frontendu
 
 ## Funkcjonalności
@@ -22,7 +22,12 @@ Aplikacja umożliwia:
 * wyświetlenie listy wykonanych importów,
 * wyświetlenie szczegółów wybranego importu,
 * wyświetlenie komunikatów błędów dla niepoprawnych rekordów,
-* automatyczne odświeżenie listy importów po wykonaniu importu.
+* automatyczne odświeżenie listy importów po wykonaniu importu,
+* wyświetlenie listy zaimportowanych transakcji.
+
+### Przykładowe pliki
+
+W folderze `examples/` znajdują się przykładowe pliki CSV, JSON i XML, które można wykorzystać do przetestowania importu.
 
 ## Architektura
 
@@ -34,8 +39,9 @@ Backend został podzielony na kilka odpowiedzialności.
 app/
 ├── Http/
 │   ├── Controllers/
-│   │   └── Api/
-│   │       └── ImportController.php
+│   │   ├── Controller.php
+│	│	├── ImportController.php
+│	│	└── TransactionController.php
 │   └── Requests/
 │       └── ImportRequest.php
 │
@@ -53,6 +59,9 @@ app/
 │   ├── Import.php
 │   ├── ImportLog.php
 │   └── Transaction.php
+│
+├── Rules/
+│   └── ValidAmount.php
 │
 └── Services/
     └── ImportService.php
@@ -125,16 +134,6 @@ Import może otrzymać jeden z trzech statusów:
 | `partial` | część rekordów została zaimportowana, a część zawierała błędy |
 | `failed`  | żaden rekord nie został poprawnie zaimportowany               |
 
-Przykład:
-
-```text
-100 rekordów
-97 poprawnych
-3 błędne
-
-status = partial
-```
-
 ## Struktura bazy danych
 
 ### `transactions`
@@ -183,78 +182,13 @@ created_at
 
 Importuje plik.
 
-Request powinien być wysłany jako `multipart/form-data`.
-
-Pole:
-
-```text
-import_file
-```
-
-Obsługiwane formaty:
-
-```text
-CSV
-JSON
-XML
-```
-
-Przykładowa odpowiedź:
-
-```json
-{
-    "id": 1,
-    "file_name": "transactions.csv",
-    "total_records": 10,
-    "successful_records": 8,
-    "failed_records": 2,
-    "status": "partial"
-}
-```
-
 ### GET `/api/imports`
 
 Zwraca listę wykonanych importów.
 
-Przykładowa odpowiedź:
-
-```json
-[
-    {
-        "id": 1,
-        "file_name": "transactions.csv",
-        "total_records": 10,
-        "successful_records": 8,
-        "failed_records": 2,
-        "status": "partial"
-    }
-]
-```
-
 ### GET `/api/imports/{id}`
 
 Zwraca szczegóły wybranego importu wraz z logami błędów.
-
-Przykładowa odpowiedź:
-
-```json
-{
-    "id": 1,
-    "file_name": "transactions.csv",
-    "total_records": 10,
-    "successful_records": 8,
-    "failed_records": 2,
-    "status": "partial",
-    "importLog": [
-        {
-            "id": 1,
-            "import_id": 1,
-            "transaction_id": "TX003",
-            "error_message": "Pole kwota musi być większe od 0."
-        }
-    ]
-}
-```
 
 ## Frontend
 
@@ -273,53 +207,33 @@ resources/js/
 ├── views/
 │   └── Imports/
 │       ├── ImportsIndex.vue
+│		├── TransactionsIndex.vue
 │       └── ImportDetails.vue
 │
-├── components/
-│   ├── Navigation.vue
-│   ├── ImportsList.vue
-│   └── ImportUploadModal.vue
-│
-└── services/
-    └── importService.js
+└── components/
+    ├── Navigation.vue
+	├── ImportDetails.vue
+	├── TransactionsList.vue
+    ├── ImportsList.vue
+    └── ImportUploadModal.vue
+
 ```
 
 ### Widok listy importów
 
-Dostępny pod:
-
-```text
-/imports
-```
-
-Wyświetla:
-
-* nazwę pliku,
-* liczbę wszystkich rekordów,
-* liczbę poprawnych rekordów,
-* liczbę błędnych rekordów,
-* status importu,
-* datę dodania,
-* link do szczegółów.
-
-Import pliku odbywa się za pomocą formularza w modalu.
-
-Po poprawnym imporcie lista zostaje automatycznie odświeżona.
+![Lista Importów](img_readme/imports_list.png)
 
 ### Szczegóły importu
 
-Dostępne pod:
+![Szczegóły importu](img_readme/import_details.png)
 
-```text
-/imports/{id}
-```
+### Okienko importu
 
-Widok prezentuje informacje o imporcie oraz tabelę błędnych rekordów.
+![Okienko importu](img_readme/import_modal.png)
 
-Dla każdego błędu wyświetlane są:
+### Widok listy transakcji
 
-* `transaction_id`,
-* komunikat błędu.
+![Lista transekcji](img_readme/transactions_list.png)
 
 ## Wymagania
 
@@ -330,65 +244,6 @@ Do uruchomienia projektu potrzebne są:
 * Node.js
 * npm
 * baza danych obsługiwana przez Laravel
-
-## Instalacja
-
-### 1. Pobranie projektu
-
-```bash
-git clone <adres-repozytorium>
-cd bank-transactions
-```
-
-### 2. Instalacja zależności PHP
-
-```bash
-composer install
-```
-
-### 3. Instalacja zależności JavaScript
-
-```bash
-npm install
-```
-
-### 4. Konfiguracja środowiska
-
-Utwórz plik `.env` na podstawie `.env.example`.
-
-```bash
-cp .env.example .env
-```
-
-Następnie skonfiguruj połączenie z bazą danych w `.env`.
-
-### 6. Migracje
-
-```bash
-php artisan migrate
-```
-
-### 7. Uruchomienie backendu
-
-```bash
-php artisan serve
-```
-
-Backend będzie dostępny pod:
-
-```text
-http://127.0.0.1:8000
-```
-
-### 8. Uruchomienie frontendu
-
-W drugim terminalu:
-
-```bash
-npm run dev
-```
-
-Następnie aplikacja będzie dostępna pod adresem wyświetlonym przez Vite.
 
 ## Testy
 
@@ -407,33 +262,6 @@ TX002,PL61109010140000071219812874,2026-09-02,250.50,PLN
 ```
 
 Separatorem dla plików CSV jest przecinek.
-
-## Obsługa błędnych rekordów
-
-Przykładowy niepoprawny rekord:
-
-```csv
-TX003,PL61109010140000071219812874,2026-09-03,-10.00,PLN
-```
-
-Ponieważ kwota musi być większa od `0`, rekord nie zostanie zapisany w `transactions`.
-
-Zostanie natomiast utworzony wpis w `import_logs`:
-
-```text
-transaction_id: TX003
-error_message: Pole kwota musi być większe od 0.
-```
-
-Pozostałe poprawne rekordy z tego samego pliku zostaną zaimportowane.
-
-## Decyzje projektowe
-
-### Osobne parsery dla formatów
-
-CSV, JSON i XML mają różną strukturę, dlatego każdy format posiada własny parser implementujący wspólny interfejs `ImportParser`.
-
-Dzięki temu `ImportService` nie musi wiedzieć, w jaki sposób konkretny format jest odczytywany.
 
 ### Factory
 
@@ -455,4 +283,3 @@ Dzięki temu pojedynczy błędny rekord nie blokuje całego importu.
 
 Błędne rekordy nie są zapisywane jako transakcje. Ich błędy są zapisywane w `import_logs`, dzięki czemu użytkownik może sprawdzić, które rekordy wymagały poprawy.
 
-Obecna implementacja skupia się na wymaganiach określonych w zadaniu.

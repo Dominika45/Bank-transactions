@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Import extends Model
 {
+	
 	const UPDATED_AT = null;
 	
     protected $fillable = ['file_name', 'total_records', 'successful_records', 'failed_records', 'status'];
@@ -15,4 +16,5 @@ class Import extends Model
 	{
 		return $this->hasMany(ImportLog::class, 'import_id');
 	}
+	
 }

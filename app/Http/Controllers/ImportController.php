@@ -13,8 +13,18 @@ class ImportController extends Controller
 
     public function store(ImportRequest $request)
     {
-       $import = $this->importService->import($request->file('import_file'));
-       return response()->json($import, 201);
+        try {
+            $import = $this->importService->import(
+                $request->file('import_file'),
+                $request->boolean('all_or_nothing')
+            );
+            return response()->json($import, 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+       
     }
 
     public function show(int $id)
@@ -26,7 +36,7 @@ class ImportController extends Controller
 
     public function index()
     {
-        $import = Import::orderBy('created_at', 'desc')->get();
+        $import = Import::orderBy('created_at', 'desc')->paginate(10);
 
         return response()->json($import);
     }

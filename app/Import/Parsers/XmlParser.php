@@ -3,18 +3,44 @@ namespace App\Import\Parsers;
 
 use App\Import\Contracts\ImportParser;
 use Illuminate\Http\UploadedFile;
+use RuntimeException;
 
 class XmlParser implements ImportParser
 {
+	
     public function parse(UploadedFile $file): iterable
     {
+		
         $transactions_array = [];
 
         $handle = file_get_contents($file->getRealPath());
 
         $transactions = simplexml_load_string($handle);
 
+        if ($transactions === false) {
+            throw new RuntimeException(
+                'Nieprawidłowa struktura pliku XML.'
+            );
+        }
+
+        $requiredFields = [
+            'transaction_id',
+            'account_number',
+            'transaction_date',
+            'amount',
+            'currency',
+        ];
+
         foreach ($transactions->transaction as $transaction) {
+
+            foreach ($requiredFields as $field) {
+                if (!isset($transaction->{$field})) {
+                    throw new RuntimeException(
+                        'Nieprawidłowa struktura pliku XML.'
+                    );
+                }
+            }
+
             $transactions_array[] =
             [
                 'transaction_id' => (string)$transaction->transaction_id,
@@ -26,5 +52,7 @@ class XmlParser implements ImportParser
         }
 
         return $transactions_array;
+		
     }
+	
 }
