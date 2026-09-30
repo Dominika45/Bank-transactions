@@ -16,7 +16,7 @@ class ImportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'import_file' => 'required|file|mimes:csv,json,xml',
+            'import_file' => 'required|file|extensions:csv,json,xml',
             'all_or_nothing' => 'boolean',
         ];
     }
